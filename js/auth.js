@@ -126,3 +126,15 @@ function persistSession(token, role) {
   sessionStorage.setItem("wellness_token", token);
   sessionStorage.setItem("wellness_role", role);
 }
+function verifyAdmin2FA({ adminId, totpCode }) {
+    return apiRequest("/admin/verify-2fa", {
+        adminId,
+        totpCode
+    });
+}
+function verify2FA({ email, totpCode }) {
+    return apiRequest("/user/verify-2fa", {
+        email,
+        totpCode
+    });
+}

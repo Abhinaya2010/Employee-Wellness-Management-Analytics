@@ -13,7 +13,9 @@
   <div class="shell">
 
     <div class="brand-panel">
-      <div class="brand-mark"><span aria-hidden="true">🌿</span> EMPLOYEE WELLNESS MANAGEMENT ANALYTICS</div>
+      <div class="brand-mark"><span aria-hidden="true">🌿</span> EMPLOYEE WELLNESS MANAGEMENT ANALYTICS
+      </div>
+
       <div class="img1">
         <img src="img1.jpg">
       </div>
@@ -160,12 +162,60 @@
 
       setButtonLoading(submitBtn, true);
       try {
-        await registerAdmin({ adminId, password });
-        showToast("Admin account created! Redirecting to sign in...", "success");
-        setTimeout(() => {
-          window.location.href = "login.html";
-        }, 1200);
-      } catch (error) {
+
+    const response = await registerAdmin({
+        adminId,
+        password
+    });
+
+    // Hide registration form
+    form.style.display = "none";
+
+    // Create QR section
+    const qrSection = document.createElement("div");
+
+    qrSection.innerHTML = `
+        <h2>Google Authenticator Setup</h2>
+
+        <p>
+            Scan this QR code using Google Authenticator.
+        </p>
+
+        <img
+            src="data:image/png;base64,${response.qr_code}"
+            width="250"
+        >
+
+        <br><br>
+
+        <p><b>Backup Secret</b></p>
+
+        <code>${response.secret}</code>
+
+        <br><br>
+
+        <button
+            id="continueBtn"
+            class="btn btn-primary">
+
+            Continue to Login
+
+        </button>
+    `;
+
+    document
+        .querySelector(".content-card")
+        .appendChild(qrSection);
+
+    document
+        .getElementById("continueBtn")
+        .addEventListener("click", () => {
+
+            window.location.href = "login-admin.html";
+
+        });
+
+} catch (error) {
         showAlertBanner(formAlert, error.message);
         showToast(error.message, "error");
       } finally {

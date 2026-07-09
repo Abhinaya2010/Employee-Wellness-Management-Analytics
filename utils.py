@@ -1,6 +1,10 @@
 import re
 import random
 import smtplib
+import pyotp
+import qrcode
+import io
+import base64
 from email.mime.text import MIMEText
 
 EMAIL_REGEX = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
@@ -70,3 +74,26 @@ def send_otp_email(to_address, otp_code, app_config):
         server.starttls()
         server.login(app_config["MAIL_USERNAME"], app_config["MAIL_PASSWORD"])
         server.sendmail(app_config.get("MAIL_SENDER"), [to_address], message.as_string())
+def generate_totp_secret():
+    return pyotp.random_base32()
+
+
+def generate_qr_code(secret, email):
+    totp = pyotp.TOTP(secret)
+
+    uri = totp.provisioning_uri(
+        name=email,
+        issuer_name="Employee Wellness Management"
+    )
+
+    qr = qrcode.make(uri)
+
+    buffer = io.BytesIO()
+    qr.save(buffer, format="PNG")
+
+    return base64.b64encode(buffer.getvalue()).decode()
+
+
+def verify_totp(secret, code):
+    totp = pyotp.TOTP(secret)
+    return totp.verify(code)

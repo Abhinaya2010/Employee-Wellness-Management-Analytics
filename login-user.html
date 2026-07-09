@@ -13,7 +13,9 @@
   <div class="shell">
 
     <div class="brand-panel">
-      <div class="brand-mark"><span aria-hidden="true">🌿</span> EMPLOYEE WELLNESS MANAGEMENT ANALYTICS</div>
+      <div class="brand-mark"><span aria-hidden="true">🌿</span> EMPLOYEE WELLNESS MANAGEMENT ANALYTICS
+      </div>
+
       <div class="img1">
         <img src="img1.jpg">
       </div>
@@ -57,6 +59,7 @@
             </div>
             <p class="field-error" id="passwordError"></p>
           </div>
+
 
           <div class="row-between">
             <label class="checkbox-row">
@@ -121,12 +124,30 @@
 
       setButtonLoading(submitBtn, true);
       try {
-        const result = await loginUser({ email, password, rememberMe: rememberMe.checked });
-        persistSession(result.token, "user");
-        showToast("Signed in successfully!", "success");
-        setTimeout(() => {
-          window.location.href = "dashboard.html"; // build this in the next module
-        }, 900);
+        const result = await loginUser({
+    email,
+    password,
+    rememberMe: rememberMe.checked
+});
+
+// Password correct but 2FA required
+if (result.requires2FA) {
+
+    sessionStorage.setItem("pendingEmail", email);
+    sessionStorage.setItem(
+    "rememberMe",
+    rememberMe.checked
+);
+
+    window.location.href = "verify-2fa.html";
+
+    return;
+}
+
+// Fallback (if 2FA disabled)
+persistSession(result.token, "user");
+
+window.location.href = "dashboard.html";
       } catch (error) {
         showAlertBanner(formAlert, error.message || "Invalid email or password.");
         showToast(error.message || "Invalid email or password.", "error");
